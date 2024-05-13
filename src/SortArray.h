@@ -45,7 +45,8 @@
 // ----------------------------------------------------------------------------
 
 /// global chance of making a mistake
-extern double g_mistake;
+extern double g_miscomp;
+extern double g_misswap;
 
 /// globally count the number of comparisons done on value_type
 extern size_t       g_compare_count;
@@ -82,7 +83,7 @@ public:
     { return value; }
 
     bool randomized(bool actual) const
-    { return (std::rand() < RAND_MAX * g_mistake) ^ actual; }
+    { return (std::rand() < RAND_MAX * g_miscomp) ^ actual; }
 
     // *** comparisons
 
@@ -108,7 +109,7 @@ public:
     int cmp(const ArrayItem& v) const
     {
         OnComparison(*this,v);
-        if (std::rand() < RAND_MAX * g_mistake * 3 / 2) {
+        if (std::rand() < RAND_MAX * g_miscomp * 3 / 2) {
             return std::rand() % 3 - 1;
         }
         return (value == v.value ? 0 : value < v.value ? -1 : +1);
@@ -375,6 +376,9 @@ public:
     /// special visualization for this operation.
     void swap(size_t i, size_t j)
     {
+        if (std::rand() < RAND_MAX * g_misswap) {
+            return;
+        }
         if (i >= m_array.size()) {
             i = m_array.size() - 1;
         }

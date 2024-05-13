@@ -60,7 +60,8 @@ public:
     void        SetDelay(size_t pos);
 
     /// set mistake chance
-    void        SetMistake(size_t pos);
+    void        SetMiscomp(size_t pos);
+    void        SetMisswap(size_t pos);
 
     /// change sound sustain
     void        SetSoundSustain(size_t pos);
@@ -83,7 +84,8 @@ public:
     virtual void OnRandomButton(wxCommandEvent &event);
     virtual void OnAboutButton(wxCommandEvent &event);
     virtual void OnSpeedSliderChange(wxScrollEvent &event);
-    virtual void OnMistakeSliderChange(wxScrollEvent &event);
+    virtual void OnMiscompSliderChange(wxScrollEvent &event);
+    virtual void OnMisswapSliderChange(wxScrollEvent &event);
     virtual void OnSoundSustainSliderChange(wxScrollEvent &event);
     virtual void OnInversionLabelClick(wxCommandEvent &event);
     virtual void OnArraySizeSliderChange(wxScrollEvent &event);

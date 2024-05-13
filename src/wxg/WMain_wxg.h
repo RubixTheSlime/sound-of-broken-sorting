@@ -43,11 +43,12 @@ public:
         ID_RANDOM_BUTTON = wxID_HIGHEST + 1004,
         ID_RECORD_BUTTON = wxID_HIGHEST + 1005,
         ID_SPEED_SLIDER = wxID_HIGHEST + 1006,
-        ID_MISTAKE_SLIDER = wxID_HIGHEST + 1007,
-        ID_SOUND_SUSTAIN_SLIDER = wxID_HIGHEST + 1008,
-        ID_INVERSION_LABEL = wxID_HIGHEST + 1009,
-        ID_ARRAY_SIZE_SLIDER = wxID_HIGHEST + 1010,
-        ID_ALGO_LIST = wxID_HIGHEST + 1011
+        ID_MISCOMP_SLIDER = wxID_HIGHEST + 1007,
+        ID_MISSWAP_SLIDER = wxID_HIGHEST + 1008,
+        ID_SOUND_SUSTAIN_SLIDER = wxID_HIGHEST + 1009,
+        ID_INVERSION_LABEL = wxID_HIGHEST + 1010,
+        ID_ARRAY_SIZE_SLIDER = wxID_HIGHEST + 1011,
+        ID_ALGO_LIST = wxID_HIGHEST + 1012
     };
     // end wxGlade
 
@@ -74,8 +75,10 @@ protected:
     wxToggleButton* recordButton;
     wxSlider* speedSlider;
     wxStaticText* labelDelayValue;
-    wxSlider* mistakeSlider;
-    wxStaticText* labelMistakeValue;
+    wxSlider* miscompSlider;
+    wxSlider* misswapSlider;
+    wxStaticText* labelMiscompValue;
+    wxStaticText* labelMisswapValue;
     wxSlider* soundSustainSlider;
     wxStaticText* labelSoundSustainValue;
     wxClickText* labelComparisonsValue;

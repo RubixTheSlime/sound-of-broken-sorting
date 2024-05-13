@@ -184,44 +184,6 @@
                                                         <flag>wxTOP|wxBOTTOM|wxALIGN_CENTER_VERTICAL</flag>
                                                         <border>4</border>
                                                         <option>0</option>
-                                                        <object class="wxStaticText" name="labelMistake" base="EditStaticText">
-                                                            <attribute>0</attribute>
-                                                            <label>Mistake chance: </label>
-                                                        </object>
-                                                    </object>
-                                                    <object class="sizeritem">
-                                                        <flag>wxEXPAND|wxALIGN_CENTER_VERTICAL</flag>
-                                                        <border>0</border>
-                                                        <option>1</option>
-                                                        <object class="wxBoxSizer" name="sizerMistake" base="EditBoxSizer">
-                                                            <orient>wxHORIZONTAL</orient>
-                                                            <object class="sizeritem">
-                                                                <flag>wxTOP|wxBOTTOM|wxALIGN_CENTER_VERTICAL</flag>
-                                                                <border>4</border>
-                                                                <option>1</option>
-                                                                <object class="wxSlider" name="mistakeSlider" base="EditSlider">
-                                                                    <style>wxSL_HORIZONTAL</style>
-                                                                    <tooltip>Changes the chance each comparison is to be wrong.</tooltip>
-                                                                    <id>ID_MISTAKE_SLIDER=?</id>
-                                                                    <range>0, 2000</range>
-                                                                </object>
-                                                            </object>
-                                                            <object class="sizeritem">
-                                                                <flag>wxLEFT|wxTOP|wxBOTTOM|wxALIGN_CENTER_VERTICAL|wxFIXED_MINSIZE</flag>
-                                                                <border>4</border>
-                                                                <option>0</option>
-                                                                <object class="wxStaticText" name="labelMistakeValue" base="EditStaticText">
-                                                                    <style>wxALIGN_CENTRE|wxST_NO_AUTORESIZE</style>
-                                                                    <attribute>1</attribute>
-                                                                    <label>50.0</label>
-                                                                </object>
-                                                            </object>
-                                                        </object>
-                                                    </object>
-                                                    <object class="sizeritem">
-                                                        <flag>wxTOP|wxBOTTOM|wxALIGN_CENTER_VERTICAL</flag>
-                                                        <border>4</border>
-                                                        <option>0</option>
                                                         <object class="wxStaticText" name="labelSoundSustain" base="EditStaticText">
                                                             <attribute>0</attribute>
                                                             <label>Sound Sustain: </label>

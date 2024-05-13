@@ -74,8 +74,10 @@ WMain::WMain(wxWindow* parent)
     SetDelay(1000);
 
     // set default mistake chance
-    mistakeSlider->SetValue(10);
-    SetMistake(10);
+    miscompSlider->SetValue(0);
+    SetMiscomp(0);
+    misswapSlider->SetValue(0);
+    SetMisswap(0);
 
     // set default sound sustain
     soundSustainSlider->SetValue(700);
@@ -123,7 +125,8 @@ BEGIN_EVENT_TABLE(WMain, WMain_wxg)
     EVT_BUTTON(wxID_ABOUT, WMain::OnAboutButton)
 
     EVT_COMMAND_SCROLL(ID_SPEED_SLIDER, WMain::OnSpeedSliderChange)
-    EVT_COMMAND_SCROLL(ID_MISTAKE_SLIDER, WMain::OnMistakeSliderChange)
+    EVT_COMMAND_SCROLL(ID_MISCOMP_SLIDER, WMain::OnMiscompSliderChange)
+    EVT_COMMAND_SCROLL(ID_MISSWAP_SLIDER, WMain::OnMisswapSliderChange)
     EVT_COMMAND_SCROLL(ID_SOUND_SUSTAIN_SLIDER, WMain::OnSoundSustainSliderChange)
     EVT_COMMAND_SCROLL(ID_ARRAY_SIZE_SLIDER, WMain::OnArraySizeSliderChange)
     EVT_LISTBOX(ID_ALGO_LIST, WMain::OnAlgoList)
@@ -339,31 +342,46 @@ void WMain::SetDelay(size_t pos)
     else
         labelDelayValue->SetLabel(wxString::Format(_("%.3f ms"), g_delay));
 }
-void WMain::OnMistakeSliderChange(wxScrollEvent &event)
-{
-    SetMistake(event.GetPosition());
-}
 
-void WMain::SetMistake(size_t pos)
-{
+void SetMistake(size_t pos, double* target, wxStaticText* label, double maximum) {
     // scale slider with this base to 10 seconds = 2 * 1000 ms
     const double base = 4;
 
     // different slider scale for Linux/GTK: (faster)
 #if __WXGTK__ || MSW_PERFORMANCECOUNTER
-    g_mistake = pow(base, pos / 2000.0 * log(2 * 1000.0 * 10.0) / log(base)) / 40000.0;
+    *target = pow(base, pos / 2000.0 * log(2 * 1000.0 * 10.0) / log(base)) / 20000.0 * maximum;
 #else
     // other systems probably have sucking real-time performance anyway
-    g_mistake = pow(base, pos / 2000.0 * log(2 * 1000.0) / log(base));
+    *target = pow(base, pos / 2000.0 * log(2 * 1000.0) / log(base));
 #endif
-    if (pos == 0) g_mistake = 0;
+    if (pos == 0) *target = 0;
 
-    if (g_mistake > 0.1)
-        labelMistakeValue->SetLabel(wxString::Format(_("%.1f%%"), g_mistake * 100));
-    else if (g_mistake > 0.01)
-        labelMistakeValue->SetLabel(wxString::Format(_("%.2f%%"), g_mistake * 100));
+    if (*target > 0.1)
+        label->SetLabel(wxString::Format(_("%.1f%%"), *target * 100));
+    else if (*target > 0.01)
+        label->SetLabel(wxString::Format(_("%.2f%%"), *target * 100));
     else
-        labelMistakeValue->SetLabel(wxString::Format(_("%.3f%%"), g_mistake * 100));
+        label->SetLabel(wxString::Format(_("%.3f%%"), *target * 100));
+}
+
+void WMain::OnMiscompSliderChange(wxScrollEvent &event)
+{
+    SetMiscomp(event.GetPosition());
+}
+
+void WMain::SetMiscomp(size_t pos)
+{
+    SetMistake(pos, &g_miscomp, labelMiscompValue, 0.5);
+}
+
+void WMain::OnMisswapSliderChange(wxScrollEvent &event)
+{
+    SetMisswap(event.GetPosition());
+}
+
+void WMain::SetMisswap(size_t pos)
+{
+    SetMistake(pos, &g_misswap, labelMisswapValue, 1.0);
 }
 
 void WMain::OnSoundSustainSliderChange(wxScrollEvent &event)

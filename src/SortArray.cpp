@@ -31,7 +31,9 @@ extern void SoundAccess(size_t i);
 // *****************************************************************************
 // *** Comparisons of ArrayItems
 
-double g_mistake = 0;
+double g_miscomp = 0;
+
+double g_misswap = 0;
 
 size_t g_compare_count = 0;
 
