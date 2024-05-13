@@ -323,7 +323,7 @@ void WMain::SetDelay(size_t pos)
 
     // different slider scale for Linux/GTK: (faster)
 #if __WXGTK__ || MSW_PERFORMANCECOUNTER
-    g_delay = pow(base, pos / 2000.0 * log(2 * 1000.0 * 10.0) / log(base)) / 10.0;
+    g_delay = pow(base, pos / 2000.0 * log(2 * 1000.0 * 10.0) / log(base)) / 100.0;
 #else
     // other systems probably have sucking real-time performance anyway
     g_delay = pow(base, pos / 2000.0 * log(2 * 1000.0) / log(base));
@@ -334,8 +334,10 @@ void WMain::SetDelay(size_t pos)
         labelDelayValue->SetLabel(wxString::Format(_("%.0f ms"), g_delay));
     else if (g_delay > 1)
         labelDelayValue->SetLabel(wxString::Format(_("%.1f ms"), g_delay));
-    else
+    else if (g_delay > 0.1)
         labelDelayValue->SetLabel(wxString::Format(_("%.2f ms"), g_delay));
+    else
+        labelDelayValue->SetLabel(wxString::Format(_("%.3f ms"), g_delay));
 }
 void WMain::OnMistakeSliderChange(wxScrollEvent &event)
 {
@@ -357,10 +359,8 @@ void WMain::SetMistake(size_t pos)
     if (pos == 0) g_mistake = 0;
 
     if (g_mistake > 0.1)
-        labelMistakeValue->SetLabel(wxString::Format(_("%.0f%%"), g_mistake * 100));
-    else if (g_mistake > 0.01)
         labelMistakeValue->SetLabel(wxString::Format(_("%.1f%%"), g_mistake * 100));
-    else if (g_mistake > 0.001)
+    else if (g_mistake > 0.01)
         labelMistakeValue->SetLabel(wxString::Format(_("%.2f%%"), g_mistake * 100));
     else
         labelMistakeValue->SetLabel(wxString::Format(_("%.3f%%"), g_mistake * 100));

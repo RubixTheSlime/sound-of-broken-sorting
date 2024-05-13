@@ -108,6 +108,9 @@ public:
     int cmp(const ArrayItem& v) const
     {
         OnComparison(*this,v);
+        if (std::rand() < RAND_MAX * g_mistake * 3 / 2) {
+            return std::rand() % 3 - 1;
+        }
         return (value == v.value ? 0 : value < v.value ? -1 : +1);
     }
 
@@ -272,6 +275,9 @@ public:
     /// Return an item of the array (yields counting and delay)
     const ArrayItem& operator[](size_t i)
     {
+        if (i >= m_array.size()) {
+            i = m_array.size() - 1;
+        }
         ASSERT(i < m_array.size());
 
         if (m_access1.index != i)
@@ -294,6 +300,9 @@ public:
     /// Return a mutable item of the array (yields counting and delay)
     ArrayItem& get_mutable(size_t i)
     {
+        if (i >= m_array.size()) {
+            i = m_array.size() - 1;
+        }
         ASSERT(i < m_array.size());
 
         if (m_access1.index != i)
@@ -317,6 +326,9 @@ public:
     /// Return an item of the array (yields delay, but no counting)
     const ArrayItem& get_nocount(size_t i)
     {
+        if (i >= m_array.size()) {
+            i = m_array.size() - 1;
+        }
         ASSERT(i < m_array.size());
 
         if (m_access1.index != i)
@@ -340,6 +352,9 @@ public:
     /// Set an item of the array: first set then yield sound, counting and delay.
     void set(size_t i, const ArrayItem& v)
     {
+        if (i >= m_array.size()) {
+            i = m_array.size() - 1;
+        }
         ASSERT(i < m_array.size());
 
         {
@@ -360,6 +375,12 @@ public:
     /// special visualization for this operation.
     void swap(size_t i, size_t j)
     {
+        if (i >= m_array.size()) {
+            i = m_array.size() - 1;
+        }
+        if (j >= m_array.size()) {
+            j = m_array.size() - 1;
+        }
         ASSERT(i < m_array.size());
         ASSERT(j < m_array.size());
 
@@ -386,6 +407,9 @@ public:
     void touch(size_t i, int color = 2,
                unsigned short sustain = 0, unsigned short priority = 0)
     {
+        if (i >= m_array.size()) {
+            i = m_array.size() - 1;
+        }
         ASSERT(i < m_array.size());
 
         {
@@ -400,6 +424,9 @@ public:
     /// Mark an array index with a color.
     void mark(size_t i, int color = 2)
     {
+        if (i >= m_array.size()) {
+            i = m_array.size() - 1;
+        }
         ASSERT(i < m_array.size());
         m_mark[i] = color;
     }
@@ -407,6 +434,12 @@ public:
     /// Swap color for two array indexes.
     void mark_swap(size_t i, size_t j)
     {
+        if (i >= m_array.size()) {
+            i = m_array.size() - 1;
+        }
+        if (j >= m_array.size()) {
+            j = m_array.size() - 1;
+        }
         ASSERT(i < m_array.size());
         ASSERT(j < m_array.size());
 
@@ -416,6 +449,9 @@ public:
     /// Unmark an array index.
     void unmark(size_t i)
     {
+        if (i >= m_array.size()) {
+            i = m_array.size() - 1;
+        }
         ASSERT(i < m_array.size());
         m_mark[i] = 0;
     }
