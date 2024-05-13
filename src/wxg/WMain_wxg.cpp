@@ -34,10 +34,16 @@ WMain_wxg::WMain_wxg(wxWindow* parent, int id, const wxString& title, const wxPo
     aboutButton = new wxButton(splitter_0_pane_2, wxID_ABOUT, _("&About"));
     randomButton = new wxButton(splitter_0_pane_2, ID_RANDOM_BUTTON, _("Ran&dom"));
     recordButton = new wxToggleButton(splitter_0_pane_2, ID_RECORD_BUTTON, _("Record"));
+
     speedSlider = new wxSlider(splitter_0_pane_2, ID_SPEED_SLIDER, 0, 0, 2000);
     labelDelayValue = new wxStaticText(splitter_0_pane_2, wxID_ANY, wxEmptyString);
+
+    mistakeSlider = new wxSlider(splitter_0_pane_2, ID_MISTAKE_SLIDER, 0, 0, 2000);
+    labelMistakeValue = new wxStaticText(splitter_0_pane_2, wxID_ANY, wxEmptyString);
+
     soundSustainSlider = new wxSlider(splitter_0_pane_2, ID_SOUND_SUSTAIN_SLIDER, 0, 0, 2000);
     labelSoundSustainValue = new wxStaticText(splitter_0_pane_2, wxID_ANY, _("50.0"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE|wxST_NO_AUTORESIZE);
+
     labelComparisonsValue = new wxClickText(splitter_0_pane_2, wxID_ANY, wxEmptyString);
     labelAccessCount = new wxClickText(splitter_0_pane_2, wxID_ANY, wxEmptyString);
     labelInversionCount = new wxClickText(splitter_0_pane_2, ID_INVERSION_LABEL, wxEmptyString);
@@ -65,6 +71,7 @@ void WMain_wxg::set_properties()
     SetTitle(_("The Sound of Sorting - http://panthema.net/2013/sound-of-sorting"));
     sortview->SetMinSize(wxSize(640, 480));
     speedSlider->SetToolTip(_("Changes the animation speed by setting the delay for each array access."));
+    mistakeSlider->SetToolTip(_("Changes how likely each comparison is to be wrong."));
     soundSustainSlider->SetToolTip(_("Changes the duration of each access sound as a multiple of the delay."));
     labelInversionCount->SetToolTip(_("Current number of inversions. Click to enable or disable."));
     labelRunsCount->SetToolTip(_("Current number of runs."));
@@ -87,7 +94,7 @@ void WMain_wxg::do_layout()
     sizer_3_staticbox->Lower();
     wxStaticBoxSizer* sizer_3 = new wxStaticBoxSizer(sizer_3_staticbox, wxVERTICAL);
     wxBoxSizer* sizerAnimationControls = new wxBoxSizer(wxVERTICAL);
-    wxFlexGridSizer* grid_sizer_3 = new wxFlexGridSizer(7, 2, 0, 0);
+    wxFlexGridSizer* grid_sizer_3 = new wxFlexGridSizer(9, 2, 0, 0);
     wxBoxSizer* sizerSoundSustain = new wxBoxSizer(wxHORIZONTAL);
     wxGridSizer* grid_sizer_2 = new wxGridSizer(3, 2, 0, 0);
     wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
@@ -101,17 +108,27 @@ void WMain_wxg::do_layout()
     grid_sizer_2->Add(randomButton, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 4);
     sizerAnimationControls->Add(grid_sizer_2, 0, wxEXPAND, 0);
     sizerAnimationControls->Add(recordButton, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 4);
+
     wxStaticText* labelSpeed = new wxStaticText(splitter_0_pane_2, wxID_ANY, _("Speed: "));
     grid_sizer_3->Add(labelSpeed, 0, wxALIGN_CENTER_VERTICAL, 0);
     grid_sizer_3->Add(speedSlider, 0, wxEXPAND|wxALIGN_CENTER_VERTICAL, 0);
     wxStaticText* labelDelay = new wxStaticText(splitter_0_pane_2, wxID_ANY, _("Delay: "));
     grid_sizer_3->Add(labelDelay, 0, wxTOP|wxBOTTOM|wxALIGN_CENTER_VERTICAL, 4);
     grid_sizer_3->Add(labelDelayValue, 0, wxTOP|wxBOTTOM|wxEXPAND|wxALIGN_CENTER_VERTICAL, 4);
+
+    wxStaticText* labelMistake = new wxStaticText(splitter_0_pane_2, wxID_ANY, _("Mistakes: "));
+    grid_sizer_3->Add(labelMistake, 0, wxALIGN_CENTER_VERTICAL, 0);
+    grid_sizer_3->Add(mistakeSlider, 0, wxEXPAND|wxALIGN_CENTER_VERTICAL, 0);
+    wxStaticText* labelMistakeChance = new wxStaticText(splitter_0_pane_2, wxID_ANY, _("Mistake Chance: "));
+    grid_sizer_3->Add(labelMistakeChance, 0, wxTOP|wxBOTTOM|wxALIGN_CENTER_VERTICAL, 4);
+    grid_sizer_3->Add(labelMistakeValue, 0, wxTOP|wxBOTTOM|wxEXPAND|wxALIGN_CENTER_VERTICAL, 4);
+
     wxStaticText* labelSoundSustain = new wxStaticText(splitter_0_pane_2, wxID_ANY, _("Sound Sustain: "));
     grid_sizer_3->Add(labelSoundSustain, 0, wxTOP|wxBOTTOM|wxALIGN_CENTER_VERTICAL, 4);
     sizerSoundSustain->Add(soundSustainSlider, 1, wxTOP|wxBOTTOM|wxALIGN_CENTER_VERTICAL, 4);
     sizerSoundSustain->Add(labelSoundSustainValue, 0, wxLEFT|wxTOP|wxBOTTOM|wxALIGN_CENTER_VERTICAL|wxFIXED_MINSIZE, 4);
     grid_sizer_3->Add(sizerSoundSustain, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL, 0);
+
     wxStaticText* labelComparisons = new wxStaticText(splitter_0_pane_2, wxID_ANY, _("Comparisons: "));
     grid_sizer_3->Add(labelComparisons, 0, wxTOP|wxBOTTOM|wxALIGN_CENTER_VERTICAL, 4);
     grid_sizer_3->Add(labelComparisonsValue, 0, wxTOP|wxBOTTOM|wxEXPAND|wxALIGN_CENTER_VERTICAL, 4);

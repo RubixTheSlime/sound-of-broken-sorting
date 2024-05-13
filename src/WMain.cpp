@@ -22,6 +22,7 @@
 
 #include "WMain.h"
 #include "SortAlgo.h"
+#include "SortArray.h"
 #include <SDL.h>
 
 #include "wxg/WAbout_wxg.h"
@@ -72,6 +73,10 @@ WMain::WMain(wxWindow* parent)
     speedSlider->SetValue(1000);
     SetDelay(1000);
 
+    // set default mistake chance
+    mistakeSlider->SetValue(10);
+    SetMistake(10);
+
     // set default sound sustain
     soundSustainSlider->SetValue(700);
     SetSoundSustain(700);
@@ -118,6 +123,7 @@ BEGIN_EVENT_TABLE(WMain, WMain_wxg)
     EVT_BUTTON(wxID_ABOUT, WMain::OnAboutButton)
 
     EVT_COMMAND_SCROLL(ID_SPEED_SLIDER, WMain::OnSpeedSliderChange)
+    EVT_COMMAND_SCROLL(ID_MISTAKE_SLIDER, WMain::OnMistakeSliderChange)
     EVT_COMMAND_SCROLL(ID_SOUND_SUSTAIN_SLIDER, WMain::OnSoundSustainSliderChange)
     EVT_COMMAND_SCROLL(ID_ARRAY_SIZE_SLIDER, WMain::OnArraySizeSliderChange)
     EVT_LISTBOX(ID_ALGO_LIST, WMain::OnAlgoList)
@@ -330,6 +336,34 @@ void WMain::SetDelay(size_t pos)
         labelDelayValue->SetLabel(wxString::Format(_("%.1f ms"), g_delay));
     else
         labelDelayValue->SetLabel(wxString::Format(_("%.2f ms"), g_delay));
+}
+void WMain::OnMistakeSliderChange(wxScrollEvent &event)
+{
+    SetMistake(event.GetPosition());
+}
+
+void WMain::SetMistake(size_t pos)
+{
+    // scale slider with this base to 10 seconds = 2 * 1000 ms
+    const double base = 4;
+
+    // different slider scale for Linux/GTK: (faster)
+#if __WXGTK__ || MSW_PERFORMANCECOUNTER
+    g_mistake = pow(base, pos / 2000.0 * log(2 * 1000.0 * 10.0) / log(base)) / 40000.0;
+#else
+    // other systems probably have sucking real-time performance anyway
+    g_mistake = pow(base, pos / 2000.0 * log(2 * 1000.0) / log(base));
+#endif
+    if (pos == 0) g_mistake = 0;
+
+    if (g_mistake > 0.1)
+        labelMistakeValue->SetLabel(wxString::Format(_("%.0f%%"), g_mistake * 100));
+    else if (g_mistake > 0.01)
+        labelMistakeValue->SetLabel(wxString::Format(_("%.1f%%"), g_mistake * 100));
+    else if (g_mistake > 0.001)
+        labelMistakeValue->SetLabel(wxString::Format(_("%.2f%%"), g_mistake * 100));
+    else
+        labelMistakeValue->SetLabel(wxString::Format(_("%.3f%%"), g_mistake * 100));
 }
 
 void WMain::OnSoundSustainSliderChange(wxScrollEvent &event)

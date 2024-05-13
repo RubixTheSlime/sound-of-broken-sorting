@@ -44,6 +44,9 @@
 
 // ----------------------------------------------------------------------------
 
+/// global chance of making a mistake
+extern double g_mistake;
+
 /// globally count the number of comparisons done on value_type
 extern size_t       g_compare_count;
 
@@ -78,25 +81,28 @@ public:
     const value_type& get_direct() const
     { return value; }
 
+    bool randomized(bool actual) const
+    { return (std::rand() < RAND_MAX * g_mistake) ^ actual; }
+
     // *** comparisons
 
     bool operator== (const ArrayItem& v) const
-    { OnComparison(*this,v); return (value == v.value); }
+    { OnComparison(*this,v); return randomized(value == v.value); }
 
     bool operator!= (const ArrayItem& v) const
-    { OnComparison(*this,v); return (value != v.value); }
+    { OnComparison(*this,v); return randomized(value != v.value); }
 
     bool operator< (const ArrayItem& v) const
-    { OnComparison(*this,v); return (value < v.value); }
+    { OnComparison(*this,v); return randomized(value < v.value); }
 
     bool operator<= (const ArrayItem& v) const
-    { OnComparison(*this,v); return (value <= v.value); }
+    { OnComparison(*this,v); return randomized(value <= v.value); }
 
     bool operator> (const ArrayItem& v) const
-    { OnComparison(*this,v); return (value > v.value); }
+    { OnComparison(*this,v); return randomized(value > v.value); }
 
     bool operator>= (const ArrayItem& v) const
-    { OnComparison(*this,v); return (value >= v.value); }
+    { OnComparison(*this,v); return randomized(value >= v.value); }
 
     // ternary comparison which counts just one
     int cmp(const ArrayItem& v) const
