@@ -71,6 +71,10 @@ const struct AlgoEntry g_algolist[] =
     { _("Quick Sort (dual pivot)"), &QuickSortDualPivot, UINT_MAX, UINT_MAX,
       _("Dual pivot quick sort variant: partitions \"<1<2?>\" using three pointers, "
         "two at left and one at right.") },
+    { _("Simple Sort"), &SimpleSort, UINT_MAX, UINT_MAX,
+      _("just conditional swap each pair")},
+    { _("Simple Bubble Sort"), &SimpleBubbleSort, UINT_MAX, UINT_MAX,
+      _("Bubble Sort but don't stop at the ends each time") },
     { _("Bubble Sort"), &BubbleSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
     { _("Cocktail Shaker Sort"), &CocktailShakerSort, UINT_MAX, UINT_MAX,
@@ -79,10 +83,16 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Comb Sort"), &CombSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
+    { _("Adaptive Comb Sort"), &AdaptiveCombSort, UINT_MAX, UINT_MAX,
+      _("Comb Sort but changes the shrink factor based on the mistake rate") },
     { _("Shell Sort"), &ShellSort, UINT_MAX, 1024,
       wxEmptyString },
+    { _("Adaptive Shell Sort"), &AdaptiveShellSort, UINT_MAX, 1024,
+      _("Shell sort but with smaller shrink factor based on mistake rate") },
     { _("Heap Sort"), &HeapSort, UINT_MAX, UINT_MAX,
-      wxEmptyString },
+      _("Heap Sort by first comparing the two children") },
+    { _("Alt Heap Sort"), &HeapSortAlt, UINT_MAX, UINT_MAX,
+      _("Heap Sort by first comparing parent to first child") },
     { _("Smooth Sort"), &SmoothSort, UINT_MAX, 1024,
       wxEmptyString },
     { _("Odd-Even Sort"), &OddEvenSort, UINT_MAX, 1024,
@@ -366,10 +376,10 @@ void QuickSortLR(SortArray& A, ssize_t lo, ssize_t hi)
 
     while (i <= j)
     {
-        while (A[i] < pivot)
+        while (i <= j && A[i] < pivot)
             i++;
 
-        while (A[j] > pivot)
+        while (j >= i && A[j] > pivot)
             j--;
 
         if (i <= j)
@@ -675,6 +685,36 @@ void BubbleSort(SortArray& A)
     }
 }
 
+void SimpleBubbleSort(SortArray& A)
+{
+    bool done = false;
+    while (!done)
+    {
+        done = true;
+        for (size_t i = 0; i < A.size()-1; ++i)
+        {
+            if (A[i] > A[i + 1])
+            {
+                done = false;
+                A.swap(i, i+1);
+            }
+        }
+    }
+}
+
+void SimpleSort(SortArray& A)
+{
+    for (size_t i = 0; i < A.size(); i++)
+    {
+        A.mark(i);
+        for (size_t j = 0; j < A.size(); j++) {
+            if (A[i] < A[j])
+                A.swap(i, j);
+        }
+        A.unmark(i);
+    }
+}
+
 // ****************************************************************************
 // *** Cocktail Shaker Sort
 
@@ -736,9 +776,10 @@ void GnomeSort(SortArray& A)
 
 // from http://en.wikipediA.org/wiki/Comb_sort
 
-void CombSort(SortArray& A)
+void CombSortInner(SortArray& A, bool adaptive)
 {
-    const double shrink = 1.3;
+    // idk if this produces optimal shrink factor but it seems to work
+    const double shrink = pow(1.3, pow((1 - g_misswap) * (1 - g_miscomp), 3));
 
     bool swapped = false;
     size_t gap = A.size();
@@ -760,6 +801,14 @@ void CombSort(SortArray& A)
             }
         }
     }
+}
+
+void CombSort(SortArray& A) {
+    CombSortInner(A, false);
+}
+
+void AdaptiveCombSort(SortArray& A) {
+    CombSortInner(A, true);
 }
 
 // ****************************************************************************
@@ -808,18 +857,33 @@ void ShellSort(SortArray& A)
 
     for (size_t k = 0; k < 16; k++)
     {
-        for (size_t h = incs[k], i = h; i < A.size(); i++)
+        size_t step = incs[k];
+        for (size_t i = step; i < A.size(); i++)
         {
-            value_type v = A[i];
             size_t j = i;
-
-            while (j >= h && A[j-h] > v)
-            {
-                A.set(j, A[j-h]);
-                j -= h;
+            while (j >= step && A[j] < A[j-step]) {
+                A.swap(j, j-step);
+                j -= step;
             }
+        }
+    }
+}
 
-            A.set(j, v);
+void AdaptiveShellSort(SortArray& A)
+{
+    const double shrink = pow(2.3, -pow((1 - g_misswap) * (1 - g_miscomp), 3));
+
+    size_t step = A.size() * shrink;
+    while (step != 1)
+    {
+        step *= shrink;
+        for (size_t i = step; i < A.size(); i++)
+        {
+            size_t j = i;
+            while (j >= step && A[j] < A[j-step]) {
+                A.swap(j, j-step);
+                j -= step;
+            }
         }
     }
 }
@@ -848,7 +912,40 @@ int largestPowerOfTwoLessThan(int n)
     return k >> 1;
 }
 
-void HeapSort(SortArray& A)
+bool normalHeapCmp(SortArray& A, size_t n, size_t& parent, size_t& child) {
+    if (child + 1 < n && A[child + 1] > A[child]) {
+        child++;
+    }
+    if (A[child] > A[parent]) {
+        A.swap(parent, child);
+        parent = child;
+        child = parent*2+1;
+        return false;
+    }
+    return true;
+}
+
+bool altHeapCmp(SortArray& A, size_t n, size_t& parent, size_t& child) {
+    bool shouldSwap = false;
+    if (A[child] > A[parent]) {
+        if (child + 1 < n && A[child + 1] > A[child]) {
+            child++;
+        }
+        shouldSwap = true;
+    }
+    else if (child + 1 < n && A[child + 1] > A[parent]) {
+        child++;
+        shouldSwap = true;
+    }
+    if (shouldSwap) {
+        A.swap(parent, child);
+        parent = child;
+        child = parent*2+1;
+    }
+    return !shouldSwap;
+}
+
+void heapSortInner(SortArray& A, bool (*cmpFcn)(SortArray&, size_t, size_t&, size_t&))
 {
     size_t n = A.size(), i = n / 2;
 
@@ -879,15 +976,7 @@ void HeapSort(SortArray& A)
         // sift operation - push the value of A[i] down the heap
         while (child < n)
         {
-            if (child + 1 < n && A[child + 1] > A[child]) {
-                child++;
-            }
-            if (A[child] > A[parent]) {
-                A.swap(parent, child);
-                parent = child;
-                child = parent*2+1;
-            }
-            else {
+            if ((*cmpFcn)(A, n, parent, child)) {
                 break;
             }
         }
@@ -895,7 +984,14 @@ void HeapSort(SortArray& A)
         // mark heap levels with different colors
         A.mark(i, log(prevPowerOfTwo(i+1)) / log(2) + 4);
     }
+}
 
+void HeapSort(SortArray& A) {
+    heapSortInner(A, &normalHeapCmp);
+}
+
+void HeapSortAlt(SortArray& A) {
+    heapSortInner(A, &altHeapCmp);
 }
 
 // ****************************************************************************
@@ -1419,40 +1515,38 @@ static void sift(SortArray& A, int pshift, int head)
     // are not doing what heapsort does - always moving nodes from near
     // the bottom of the tree to the root.
 
-    value_type val = A[head];
+    //value_type val = A[head];
 
     while (pshift > 1)
     {
         int rt = head - 1;
         int lf = head - 1 - LP[pshift - 2];
 
-        if (val.cmp(A[lf]) >= 0 && val.cmp(A[rt]) >= 0)
+        if (A[head].cmp(A[lf]) >= 0 && A[head].cmp(A[rt]) >= 0)
             break;
 
         if (A[lf].cmp(A[rt]) >= 0) {
-            A.set(head, A[lf]);
+            A.swap(head, lf);
             head = lf;
             pshift -= 1;
         }
         else {
-            A.set(head, A[rt]);
+            A.swap(head, rt);
             head = rt;
             pshift -= 2;
         }
     }
-
-    A.set(head, val);
 }
 
 static void trinkle(SortArray& A, int p, int pshift, int head, bool isTrusty)
 {
-    value_type val = A[head];
+    //value_type val = A[head];
 
     while (p != 1)
     {
         int stepson = head - LP[pshift];
 
-        if (A[stepson].cmp(val) <= 0)
+        if (A[stepson].cmp(A[head]) <= 0)
             break; // current node is greater than head. sift.
 
         // no need to check this if we know the current node is trusty,
@@ -1466,7 +1560,7 @@ static void trinkle(SortArray& A, int p, int pshift, int head, bool isTrusty)
                 break;
         }
 
-        A.set(head, A[stepson]);
+        A.swap(head, stepson);
 
         head = stepson;
         //int trail = Integer.numberOfTrailingZeros(p & ~1);
@@ -1477,7 +1571,6 @@ static void trinkle(SortArray& A, int p, int pshift, int head, bool isTrusty)
     }
 
     if (!isTrusty) {
-        A.set(head, val);
         sift(A, pshift, head);
     }
 }

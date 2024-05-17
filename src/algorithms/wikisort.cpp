@@ -35,6 +35,47 @@
 #include <cassert>
 #include <cstring>
 
+namespace Broken {
+
+template <class T>
+void swap(T& a, T& b)
+{
+    if (rand() >= RAND_MAX * g_misswap)
+        std::swap(a, b);
+
+}
+
+template <class ForwardIt1, class ForwardIt2>
+void swap_ranges(ForwardIt1 first1, ForwardIt2 last1, ForwardIt2 first2)
+{
+    for (; first1 != last1; ++first1, ++first2)
+        swap(*first1, *first2);
+}
+
+template <class ForwardIt>
+ForwardIt rotate(ForwardIt first, ForwardIt middle, ForwardIt last)
+{
+    if (first == middle)
+        return last;
+    if (middle == last)
+        return first;
+
+    ForwardIt write = first;
+    ForwardIt next_read = first;
+    for (ForwardIt read = middle; read != last; ++write, ++read)
+    {
+        if (write == next_read)
+            next_read = read;
+        swap(*write, *read);
+    }
+    Broken::rotate(write, next_read, last);
+    return write;
+
+}
+
+}
+
+
 namespace WikiSortNS {
 
 // structure to represent ranges within the array
@@ -73,14 +114,14 @@ size_t FloorPowerOfTwo (const size_t value) {
 template <typename Iterator, typename Comparison>
 void InsertionSort(Iterator begin, Iterator end, const Comparison compare) {
     for (Iterator it = begin; it != end; ++it) {
-        std::rotate(std::upper_bound(begin, it, *it, compare), it, it+1);
+        Broken::rotate(std::upper_bound(begin, it, *it, compare), it, it+1);
     }
 }
 
 // swap a series of values in the array
 template <typename Iterator>
 void BlockSwap(Iterator start1, Iterator start2, const size_t block_size) {
-    std::swap_ranges(start1, start1 + block_size, start2);
+    Broken::swap_ranges(start1, start1 + block_size, start2);
 }
 
 // rotate the values in an array ([0 1 2 3] becomes [1 2 3 0] if we rotate by 1)
@@ -117,7 +158,7 @@ void Rotate(Iterator begin, Iterator end, const ssize_t amount,
         }
     }
 
-    std::rotate(begin, split, end);
+    Broken::rotate(begin, split, end);
 }
 
 // standard merge operation using an internal or external buffer
@@ -161,12 +202,12 @@ void Merge(const RangeI<Iterator>& buffer, const RangeI<Iterator>& A, const Rang
         if (B.length() > 0 && A.length() > 0) {
             while (true) {
                 if (!compare(*B_index, *A_index)) {
-                    std::swap(*insert_index, *A_index);
+                    Broken::swap(*insert_index, *A_index);
                     A_index++;
                     insert_index++;
                     if (A_index == A_last) break;
                 } else {
-                    std::swap(*insert_index, *B_index);
+                    Broken::swap(*insert_index, *B_index);
                     B_index++;
                     insert_index++;
                     if (B_index == B_last) break;
@@ -174,7 +215,7 @@ void Merge(const RangeI<Iterator>& buffer, const RangeI<Iterator>& A, const Rang
             }
         }
 
-        std::swap_ranges(A_index, A_last, insert_index);
+        Broken::swap_ranges(A_index, A_last, insert_index);
     }
 }
 
@@ -438,7 +479,7 @@ void Sort(Iterator first, Iterator last, const Comparison compare)
 
                 // swap the second value of each A block with the value in buffer1
                 for (Iterator index = buffer1.start, indexA = firstA.end + 1; indexA < blockA.end; index++, indexA += block_size)
-                    std::swap(*index, *indexA);
+                    Broken::swap(*index, *indexA);
 
                 // start rolling the A blocks through the B blocks!
                 // whenever we leave an A block behind, we'll need to merge the previous A block with any B blocks that follow it, so track that information as well
@@ -453,7 +494,7 @@ void Sort(Iterator first, Iterator last, const Comparison compare)
                 if (lastA.length() <= cache_size)
                     std::copy(lastA.start, lastA.end, cache);
                 else
-                    std::swap_ranges(lastA.start, lastA.end, buffer2.start);
+                    Broken::swap_ranges(lastA.start, lastA.end, buffer2.start);
 
                 while (true) {
                     // if there's a previous B block and the first value of the minimum A block is <= the last value of the previous B block,
@@ -468,7 +509,7 @@ void Sort(Iterator first, Iterator last, const Comparison compare)
 
                         // we need to swap the second item of the previous A block back with its original value, which is stored in buffer1
                         // since the firstA block did not have its value swapped out, we need to make sure the previous A block is not unevenly sized
-                        std::swap(*(blockA.start + 1), *(indexA++));
+                        Broken::swap(*(blockA.start + 1), *(indexA++));
 
                         // locally merge the previous A block with the B values that follow it, using the buffer as swap space
                         Merge(buffer2, lastA, Range(lastA.end, B_split), compare, cache, cache_size);

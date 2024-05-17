@@ -71,13 +71,18 @@ void QuickSortTernaryLL(class SortArray& a);
 void QuickSortDualPivot(class SortArray& a);
 
 void BubbleSort(class SortArray& a);
+void SimpleBubbleSort(class SortArray& a);
 void CocktailShakerSort(class SortArray& a);
+void SimpleSort(class SortArray& a);
 void CombSort(class SortArray& a);
+void AdaptiveCombSort(class SortArray& a);
 void GnomeSort(class SortArray& a);
 void OddEvenSort(class SortArray& a);
 
 void ShellSort(SortArray& a);
+void AdaptiveShellSort(SortArray& a);
 void HeapSort(class SortArray& a);
+void HeapSortAlt(class SortArray& a);
 void SmoothSort(class SortArray& a);
 
 void BitonicSort(SortArray& a);

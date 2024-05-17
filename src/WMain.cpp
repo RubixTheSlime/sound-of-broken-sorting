@@ -343,25 +343,7 @@ void WMain::SetDelay(size_t pos)
         labelDelayValue->SetLabel(wxString::Format(_("%.3f ms"), g_delay));
 }
 
-void SetMistake(size_t pos, double* target, wxStaticText* label, double maximum) {
-    // scale slider with this base to 10 seconds = 2 * 1000 ms
-    const double base = 4;
-
-    // different slider scale for Linux/GTK: (faster)
-#if __WXGTK__ || MSW_PERFORMANCECOUNTER
-    *target = pow(base, pos / 2000.0 * log(2 * 1000.0 * 10.0) / log(base)) / 20000.0 * maximum;
-#else
-    // other systems probably have sucking real-time performance anyway
-    *target = pow(base, pos / 2000.0 * log(2 * 1000.0) / log(base));
-#endif
-    if (pos == 0) *target = 0;
-
-    if (*target > 0.1)
-        label->SetLabel(wxString::Format(_("%.1f%%"), *target * 100));
-    else if (*target > 0.01)
-        label->SetLabel(wxString::Format(_("%.2f%%"), *target * 100));
-    else
-        label->SetLabel(wxString::Format(_("%.3f%%"), *target * 100));
+void SetMistakePowered(size_t pos, double* target, wxStaticText* label, double maximum) {
 }
 
 void WMain::OnMiscompSliderChange(wxScrollEvent &event)
@@ -371,7 +353,17 @@ void WMain::OnMiscompSliderChange(wxScrollEvent &event)
 
 void WMain::SetMiscomp(size_t pos)
 {
-    SetMistake(pos, &g_miscomp, labelMiscompValue, 0.5);
+    double scaled = pos / 2000.0;
+    scaled *= scaled;
+    scaled *= scaled;
+    g_miscomp = scaled / 2;
+
+    if (g_miscomp > 0.1)
+        labelMiscompValue->SetLabel(wxString::Format(_("%.1f%%"), g_miscomp * 100));
+    else if (g_miscomp > 0.01)
+        labelMiscompValue->SetLabel(wxString::Format(_("%.2f%%"), g_miscomp * 100));
+    else
+        labelMiscompValue->SetLabel(wxString::Format(_("%.3f%%"), g_miscomp * 100));
 }
 
 void WMain::OnMisswapSliderChange(wxScrollEvent &event)
@@ -381,7 +373,17 @@ void WMain::OnMisswapSliderChange(wxScrollEvent &event)
 
 void WMain::SetMisswap(size_t pos)
 {
-    SetMistake(pos, &g_misswap, labelMisswapValue, 1.0);
+    double scaled = pos / 2000.0;
+    scaled = 3 * scaled * scaled - 2 * scaled * scaled * scaled;
+    scaled = 3 * scaled * scaled - 2 * scaled * scaled * scaled;
+    g_misswap = scaled;
+
+    if ((g_misswap > 0.1) && (g_misswap < 0.9))
+        labelMisswapValue->SetLabel(wxString::Format(_("%.1f%%"), g_misswap * 100));
+    else if ((g_misswap > 0.01) && (g_misswap < 0.99))
+        labelMisswapValue->SetLabel(wxString::Format(_("%.2f%%"), g_misswap * 100));
+    else
+        labelMisswapValue->SetLabel(wxString::Format(_("%.3f%%"), g_misswap * 100));
 }
 
 void WMain::OnSoundSustainSliderChange(wxScrollEvent &event)
